@@ -1,0 +1,103 @@
+[
+    {
+      "landId": "l1",
+      "title": "5 Acres in Texas",
+      "description": "Flat land, ideal for farming or ranching.",
+      "price": 85000,
+      "location": "Austin, Texas",
+      "image": "assets/land1.jpg",
+      "ownerId": "u1",
+      "listedDate": "2025-07-01"
+    },
+    {
+      "landId": "l2",
+      "title": "Beachfront Plot",
+      "description": "Stunning view with direct beach access.",
+      "price": 150000,
+      "location": "Miami, FL",
+      "image": "assets/land2.jpg",
+      "ownerId": "u2",
+      "listedDate": "2025-07-15"
+    },
+    {
+      "landId": "l3",
+      "title": "Mountain Retreat Land",
+      "description": "Peaceful mountainous land for a retreat cabin.",
+      "price": 95000,
+      "location": "Denver, Colorado",
+      "image": "assets/land1.jpg",
+      "ownerId": "u1",
+      "listedDate": "2025-07-10"
+    },
+    {
+      "landId": "l4",
+      "title": "Suburban Residential Plot",
+      "description": "Perfect for residential development in a growing suburb.",
+      "price": 120000,
+      "location": "Raleigh, North Carolina",
+      "image": "assets/land2.jpg",
+      "ownerId": "u2",
+      "listedDate": "2025-07-18"
+    },
+    {
+      "landId": "l5",
+      "title": "Forest Land in Oregon",
+      "description": "Dense forest ideal for conservation or eco retreats.",
+      "price": 110000,
+      "location": "Eugene, Oregon",
+      "image": "assets/land1.jpg",
+      "ownerId": "u1",
+      "listedDate": "2025-07-20"
+    },
+    {
+      "landId": "l6",
+      "title": "Lakeview Plot",
+      "description": "Beautiful lake-facing land for a summer house.",
+      "price": 98000,
+      "location": "Madison, Wisconsin",
+      "image": "assets/land2.jpg",
+      "ownerId": "u2",
+      "listedDate": "2025-07-21"
+    },
+    {
+      "landId": "l7",
+      "title": "Commercial Lot Downtown",
+      "description": "Prime land for commercial development.",
+      "price": 300000,
+      "location": "Dallas, Texas",
+      "image": "assets/land1.jpg",
+      "ownerId": "u1",
+      "listedDate": "2025-07-11"
+    },
+    {
+      "landId": "l8",
+      "title": "Hilltop View Lot",
+      "description": "Elevated land with sweeping views of the valley.",
+      "price": 135000,
+      "location": "Boise, Idaho",
+      "image": "assets/land2.jpg",
+      "ownerId": "u2",
+      "listedDate": "2025-07-19"
+    },
+    {
+      "landId": "l9",
+      "title": "Desert Land for Solar Farm",
+      "description": "Open, sunny area perfect for solar installation.",
+      "price": 75000,
+      "location": "Phoenix, Arizona",
+      "image": "assets/land1.jpg",
+      "ownerId": "u1",
+      "listedDate": "2025-07-05"
+    },
+    {
+      "landId": "l10",
+      "title": "Coastal Development Plot",
+      "description": "Ideal for resort or vacation home development.",
+      "price": 220000,
+      "location": "Charleston, South Carolina",
+      "image": "assets/land2.jpg",
+      "ownerId": "u2",
+      "listedDate": "2025-07-17"
+    }
+  ]
+  

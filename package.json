@@ -1,5 +1,5 @@
 {
-  "name": "bodymalk-react",
+  "name": "landsell-app",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -12,12 +12,14 @@
   "dependencies": {
     "@reduxjs/toolkit": "^2.8.2",
     "@tailwindcss/vite": "^4.1.11",
+    "@types/react-redux": "^7.1.34",
+    "@types/react-router-dom": "^5.3.3",
+    "lucide-react": "^0.525.0",
     "nodemon": "^3.1.10",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.7.0",
-    "remixicon": "^4.6.0",
     "tailwindcss": "^4.1.11"
   },
   "devDependencies": {
