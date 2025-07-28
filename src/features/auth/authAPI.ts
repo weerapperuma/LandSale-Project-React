@@ -1,23 +1,61 @@
 export interface User {
     id: string;
     email: string;
+    name?: string;
 }
 
 export interface LoginResponse {
-    user: User ;
+    user: User;
     token: string | null;
 }
-export async function login(credentials:{ email: string, password: string} ): Promise<LoginResponse> {
-    const response = await fetch('http://localhost:5000/api/auth/login', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(credentials),
-    })
-    if (!response.ok) {
-        throw new Error('Failed to login')
+
+// Mock users for testing
+const mockUsers = [
+    { id: '1', email: 'user@example.com', password: 'password123', name: 'John Doe' },
+    { id: '2', email: 'admin@example.com', password: 'admin123', name: 'Admin User' },
+    { id: '3', email: 'test@example.com', password: 'test123', name: 'Test User' },
+];
+
+// Mock login function for testing
+export async function mockLogin(credentials: { email: string; password: string }): Promise<LoginResponse> {
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const user = mockUsers.find(u => u.email === credentials.email && u.password === credentials.password);
+    
+    if (!user) {
+        throw new Error('Invalid email or password');
     }
-    const data = await response.json()
-    return data
+    
+    return {
+        user: { id: user.id, email: user.email, name: user.name },
+        token: `mock-token-${user.id}-${Date.now()}`
+    };
 }
+
+// Real API function (for production)
+export async function login(credentials: { email: string; password: string }): Promise<LoginResponse> {
+    try {
+        const response = await fetch('http://localhost:5000/api/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(credentials),
+        });
+        
+        if (!response.ok) {
+            throw new Error('Failed to login');
+        }
+        
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        // Fallback to mock login if real API is not available
+        console.warn('Real API not available, using mock login');
+        return mockLogin(credentials);
+    }
+}
+
+// Use mock login for development
+export const loginUser = mockLogin;

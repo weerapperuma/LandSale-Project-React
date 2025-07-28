@@ -1,6 +1,5 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import NavBar from '../components/NavBar.tsx'
 import LandCard from '../components/LandCard.tsx'
 import lands from '../data/lands.json'
 import Footer from '../components/Footer.tsx'
@@ -10,7 +9,6 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-800">
-        <NavBar/>
       {/* Hero Section */}
       <section className="bg-green-700 text-white py-20 px-4 text-center">
         <h1 className="text-4xl md:text-5xl font-bold mb-4">Buy and Sell Land Easily</h1>

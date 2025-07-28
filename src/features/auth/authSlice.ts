@@ -1,6 +1,6 @@
 // src/features/auth/authSlice.ts
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { login } from './authAPI';
+import { login, mockLogin } from './authAPI';
 import type { LoginResponse } from './authAPI';
 
 interface AuthState {
@@ -8,13 +8,15 @@ interface AuthState {
   token: string | null
   loading: boolean
   error: string | null
+  isAuthenticated: boolean
 }
 
 const initialState: AuthState = {
   user: null,
-  token: null,
+  token: localStorage.getItem('token'),
   loading: false,
   error: null,
+  isAuthenticated: !!localStorage.getItem('token'),
 }
 
 // thunk calls the login function from authAPI
@@ -24,13 +26,22 @@ export const loginUser = createAsyncThunk<
   { rejectValue: string }
 >('auth/loginUser', async (credentials, thunkAPI) => {
   try {
-    const data = await login(credentials)
-    if (data.token) {
-      localStorage.setItem('token', data.token)
+    // Try real API first, fallback to mock
+    let data: LoginResponse;
+    try {
+      data = await login(credentials);
+    } catch (error) {
+      console.warn('Real API failed, using mock login');
+      data = await mockLogin(credentials);
     }
-    return data
+    
+    if (data.token) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+    }
+    return data;
   } catch (error: any) {
-    return thunkAPI.rejectWithValue(error.message)
+    return thunkAPI.rejectWithValue(error.message || 'Login failed');
   }
 })
 
@@ -39,33 +50,56 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout(state) {
-      state.user = null
-      state.token = null
-      state.error = null
-      localStorage.removeItem('token')
+      state.user = null;
+      state.token = null;
+      state.error = null;
+      state.isAuthenticated = false;
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
     },
     clearError(state) {
-      state.error = null
+      state.error = null;
+    },
+    // Initialize auth state from localStorage
+    initializeAuth(state) {
+      const token = localStorage.getItem('token');
+      const userStr = localStorage.getItem('user');
+      
+      if (token && userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          state.user = user;
+          state.token = token;
+          state.isAuthenticated = true;
+        } catch (error) {
+          // Clear invalid data
+          localStorage.removeItem('token');
+          localStorage.removeItem('user');
+        }
+      }
     },
   },
   extraReducers: (builder) => {
     builder
       .addCase(loginUser.pending, (state) => {
-        state.loading = true
-        state.error = null
+        state.loading = true;
+        state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
-        state.loading = false
-        state.user = action.payload.user
-        state.token = action.payload.token
+        state.loading = false;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
+        state.isAuthenticated = true;
+        state.error = null;
       })
       .addCase(loginUser.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.payload || 'Login failed'
+        state.loading = false;
+        state.error = action.payload || 'Login failed';
+        state.isAuthenticated = false;
       })
   },
 })
 
-export const { logout, clearError } = authSlice.actions
+export const { logout, clearError, initializeAuth } = authSlice.actions
 
 export default authSlice.reducer

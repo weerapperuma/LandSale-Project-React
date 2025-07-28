@@ -42,4 +42,12 @@ vite.config.json
    "tailwindcss": "^4.1.11"
    },
 3. change main.tsx with redux
-4. 
+
+# Login
+1. A Login Form (UI) - 
+```src/features/auth/LoginPage.tsx```
+2. Logic to authenticate users(API or local check)
+```src/features/auth/authAPI.ts```
+3. State management for authentication(API or local check)
+```src/features/auth/authSlice.ts (Redux slice for auth)```
+4. Redirects or UI changes after login
