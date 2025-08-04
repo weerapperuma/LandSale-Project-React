@@ -1,3 +1,5 @@
+import usersData from '../../data/users.json';
+
 export interface User {
     id: string;
     email: string;
@@ -9,12 +11,13 @@ export interface LoginResponse {
     token: string | null;
 }
 
-// Mock users for testing
-const mockUsers = [
-    { id: '1', email: 'user@example.com', password: 'password123', name: 'John Doe' },
-    { id: '2', email: 'admin@example.com', password: 'admin123', name: 'Admin User' },
-    { id: '3', email: 'test@example.com', password: 'test123', name: 'Test User' },
-];
+// Import users from users.json and map to our format
+const mockUsers = usersData.map(user => ({
+    id: user.userId,
+    email: user.userEmail,
+    password: user.userPassword, // Note: In real app, this would be hashed
+    name: user.userName
+}));
 
 // Mock login function for testing
 export async function mockLogin(credentials: { email: string; password: string }): Promise<LoginResponse> {

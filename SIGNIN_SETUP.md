@@ -30,19 +30,18 @@ npm run dev
 ```
 
 ### 2. Test Login Credentials
-Use these mock accounts to test the login:
+Use these credentials from `src/data/users.json` to test the login:
 
 | Email | Password | Name |
 |-------|----------|------|
-| `user@example.com` | `password123` | John Doe |
-| `admin@example.com` | `admin123` | Admin User |
-| `test@example.com` | `test123` | Test User |
+| `alice@example.com` | `hashedpassword1` | Alice Johnson |
+| `bob@example.com` | `hashedpassword2` | Bob Smith |
 
 ### 3. Test Scenarios
 
 #### ✅ Successful Login
 1. Go to `/login` or click "Sign In" in NavBar
-2. Enter valid credentials (e.g., `user@example.com` / `password123`)
+2. Enter valid credentials (e.g., `alice@example.com` / `hashedpassword1`)
 3. Click "Sign In" button
 4. Should redirect to home page
 5. NavBar should show user menu with name/email
@@ -84,8 +83,10 @@ src/
 ├── components/
 │   ├── NavBar.tsx          # Updated with user menu
 │   └── ProtectedRoute.tsx  # New - protects routes
+├── data/
+│   └── users.json          # User credentials for testing
 ├── features/auth/
-│   ├── authAPI.ts          # Updated with mock login
+│   ├── authAPI.ts          # Updated with users.json import
 │   ├── authSlice.ts        # Updated with persistence
 │   └── LoginPage.tsx       # Enhanced UI
 ├── pages/
@@ -97,13 +98,22 @@ src/
 
 ## 🔧 Configuration
 
-### Mock Users (in `authAPI.ts`)
-```typescript
-const mockUsers = [
-    { id: '1', email: 'user@example.com', password: 'password123', name: 'John Doe' },
-    { id: '2', email: 'admin@example.com', password: 'admin123', name: 'Admin User' },
-    { id: '3', email: 'test@example.com', password: 'test123', name: 'Test User' },
-];
+### User Credentials (from `users.json`)
+```json
+[
+    {
+      "userId": "u1",
+      "userName": "Alice Johnson",
+      "userEmail": "alice@example.com",
+      "userPassword": "hashedpassword1"
+    },
+    {
+      "userId": "u2",
+      "userName": "Bob Smith",
+      "userEmail": "bob@example.com",
+      "userPassword": "hashedpassword2"
+    }
+]
 ```
 
 ### Real API Integration
@@ -157,7 +167,7 @@ To use a real backend API:
 
 1. **Login not working**
    - Check console for errors
-   - Verify credentials match mock users
+   - Verify credentials match users.json
    - Ensure Redux store is properly configured
 
 2. **NavBar not updating**
@@ -192,5 +202,6 @@ localStorage.removeItem('user')
 - **Redux Toolkit** manages all auth state
 - **Tailwind CSS** provides all styling
 - **Lucide React** provides icons
+- **User credentials** are loaded from `src/data/users.json`
 
 The system is production-ready once you replace the mock API with a real backend! 
