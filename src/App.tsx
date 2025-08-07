@@ -4,6 +4,7 @@ import { initializeAuth } from './features/auth/authSlice'
 import type { AppDispatch } from './app/store'
 import AppRoutes from './routes/AppRoutes'
 import NavBar from './components/NavBar'
+import { ToastContainer } from 'react-toastify';
 
 function App() {
   const dispatch = useDispatch<AppDispatch>()
@@ -19,6 +20,7 @@ function App() {
       <div className="App">
         <AppRoutes/>
       </div>
+        <ToastContainer position="top-center" autoClose={3000} />
     </>
   )
 }

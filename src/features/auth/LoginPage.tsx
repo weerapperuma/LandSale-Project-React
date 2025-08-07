@@ -3,18 +3,25 @@ import { useDispatch, useSelector } from 'react-redux'
 import { loginUser } from './authSlice'
 import type { AppDispatch, RootState } from '../../app/store'
 import { useNavigate, Link } from 'react-router-dom'
-import { Eye, EyeOff, Mail, Lock } from 'lucide-react'
+import { Eye, EyeOff, Mail, Lock, AlertCircle } from 'lucide-react'
+import {toast} from "react-toastify";
 
 const LoginPage = () => {
+  const dispatch = useDispatch<AppDispatch>()
+  const navigate = useNavigate()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [formErrors, setFormErrors] = useState<{ email?: string; password?: string }>({})
-  
-  const dispatch = useDispatch<AppDispatch>()
-  const navigate = useNavigate()
 
-  const { user, loading, error } = useSelector((state: RootState) => state.auth)
+  const { loading, error, token } = useSelector((state: RootState) => state.auth)
+  // Redirect if already logged in
+  useEffect(() => {
+    if (token) {
+      navigate('/')
+    }
+  }, [token, navigate])
 
   const validateForm = () => {
     const errors: { email?: string; password?: string } = {}
@@ -22,7 +29,7 @@ const LoginPage = () => {
     if (!email) {
       errors.email = 'Email is required'
     } else if (!/\S+@\S+\.\S+/.test(email)) {
-      errors.email = 'Email is invalid'
+      errors.email = 'Please enter a valid email address'
     }
     
     if (!password) {
@@ -35,18 +42,20 @@ const LoginPage = () => {
     return Object.keys(errors).length === 0
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (validateForm()) {
-      dispatch(loginUser({ email, password }))
+      try {
+        await dispatch(loginUser({ email, password })).unwrap()
+        toast.success("Signed in successfully!")
+        navigate('/')
+      } catch (err) {
+        console.error('Login failed:', err)
+        toast.error("Login failed. Please check credentials.")
+
+      }
     }
   }
-
-  useEffect(() => {
-    if (user) {
-      navigate('/')
-    }
-  }, [user, navigate])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-sky-50 via-blue-50 to-cyan-50 flex items-center justify-center p-4">
@@ -62,8 +71,9 @@ const LoginPage = () => {
 
         {/* Error Message */}
         {error && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6">
-            {error}
+          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-6 flex items-center">
+            <AlertCircle className="h-5 w-5 mr-2 flex-shrink-0" />
+            <span>{error}</span>
           </div>
         )}
 
@@ -71,7 +81,7 @@ const LoginPage = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
               Email Address
             </label>
             <div className="relative">
@@ -79,24 +89,29 @@ const LoginPage = () => {
                 <Mail className="h-5 w-5 text-gray-400" />
               </div>
               <input
+                id="email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition ${
-                  formErrors.email ? 'border-red-300' : 'border-gray-300'
+                  formErrors.email ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
                 }`}
                 placeholder="Enter your email"
                 required
+                autoComplete="email"
               />
             </div>
             {formErrors.email && (
-              <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+              <p className="text-red-500 text-sm mt-1 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {formErrors.email}
+              </p>
             )}
           </div>
 
           {/* Password Field */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
               Password
             </label>
             <div className="relative">
@@ -104,18 +119,20 @@ const LoginPage = () => {
                 <Lock className="h-5 w-5 text-gray-400" />
               </div>
               <input
+                id="password"
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 className={`w-full pl-10 pr-12 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent transition ${
-                  formErrors.password ? 'border-red-300' : 'border-gray-300'
+                  formErrors.password ? 'border-red-300 bg-red-50' : 'border-gray-300 hover:border-gray-400'
                 }`}
                 placeholder="Enter your password"
                 required
+                autoComplete="current-password"
               />
               <button
                 type="button"
-                className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                className="absolute inset-y-0 right-0 pr-3 flex items-center hover:text-gray-600"
                 onClick={() => setShowPassword(!showPassword)}
               >
                 {showPassword ? (
@@ -126,17 +143,26 @@ const LoginPage = () => {
               </button>
             </div>
             {formErrors.password && (
-              <p className="text-red-500 text-sm mt-1">{formErrors.password}</p>
+              <p className="text-red-500 text-sm mt-1 flex items-center">
+                <AlertCircle className="h-4 w-4 mr-1" />
+                {formErrors.password}
+              </p>
             )}
           </div>
 
           {/* Remember Me & Forgot Password */}
           <div className="flex items-center justify-between">
             <label className="flex items-center">
-              <input type="checkbox" className="rounded border-gray-300 text-sky-600 focus:ring-sky-500" />
+              <input 
+                type="checkbox" 
+                className="rounded border-gray-300 text-sky-600 focus:ring-sky-500" 
+              />
               <span className="ml-2 text-sm text-gray-600">Remember me</span>
             </label>
-            <Link to="/forgot-password" className="text-sm text-sky-600 hover:text-sky-500">
+            <Link 
+              to="/forgot-password" 
+              className="text-sm text-sky-600 hover:text-sky-500 font-medium"
+            >
               Forgot password?
             </Link>
           </div>
@@ -157,6 +183,15 @@ const LoginPage = () => {
             )}
           </button>
         </form>
+
+        {/* Demo Credentials */}
+        <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+          <h4 className="text-sm font-medium text-blue-800 mb-2">Demo Credentials:</h4>
+          <div className="text-sm text-blue-700 space-y-1">
+            <p><strong>Email:</strong> alice@example.com</p>
+            <p><strong>Password:</strong> hashedpassword1</p>
+          </div>
+        </div>
 
         {/* Sign Up Link */}
         <div className="mt-8 text-center">

@@ -5,6 +5,10 @@ import { BrowserRouter } from 'react-router-dom'
 import { store } from './app/store.ts'
 import { Provider } from 'react-redux'
 import App from './App.tsx'
+import { initializeAuth } from './features/auth/authSlice'
+
+// Initialize authentication state from localStorage
+store.dispatch(initializeAuth())
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
