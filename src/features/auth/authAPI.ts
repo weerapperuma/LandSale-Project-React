@@ -2,6 +2,8 @@
 
 export interface LoginResponse {
     token: string;
+    userId: string;
+    role: string;
 }
 
 export async function login(credentials: { email: string; password: string }): Promise<LoginResponse> {
