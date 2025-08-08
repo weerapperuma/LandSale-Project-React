@@ -94,7 +94,32 @@ const MyListings: React.FC = () => {
                                     Update
                                 </button>
                                 <button
-                                    onClick={() => toast.error(`Delete clicked for "${land.title}"`)}
+                                    onClick={async () => {
+                                        const confirm = window.confirm(`Are you sure you want to delete "${land.title}"?`);
+                                        if (!confirm) return;
+
+                                        try {
+                                            const token = localStorage.getItem("token");
+                                            const res = await fetch(`http://localhost:5000/api/v1/lands/${land._id}`, {
+                                                method: "DELETE",
+                                                headers: {
+                                                    Authorization: `Bearer ${token}`,
+                                                },
+                                            });
+
+                                            if (!res.ok) {
+                                                throw new Error("Failed to delete land");
+                                            }
+
+                                            // Remove land from UI
+                                            setLands((prev) => prev.filter((l) => l._id !== land._id));
+                                            toast.success(`"${land.title}" deleted successfully`);
+                                        } catch (err) {
+                                            console.error(err);
+                                            toast.error("Failed to delete listing");
+                                        }
+                                    }}
+
                                     className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold py-1 px-3 rounded shadow"
                                 >
                                     Delete

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import rawDistrictCityData from "../data/districtCities.json";
+import {useNavigate} from "react-router-dom";
 
 type DistrictCityData = {
     [districtName: string]: string[];
@@ -21,7 +22,7 @@ const CreateLand: React.FC = () => {
     const [success, setSuccess] = useState<string | null>(null);
     const token = localStorage.getItem("token");
     const userId: string = localStorage.getItem("userId") || "";
-
+    const navigate = useNavigate();
     const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setError(null);
         if (!e.target.files) return;
@@ -77,17 +78,6 @@ const CreateLand: React.FC = () => {
                 formData.append("images", file);
             });
 
-            console.log("Sending data to backend:");
-            console.log("title:", title);
-            console.log("description:", description);
-            console.log("district:", district);
-            console.log("city:", city === "Other" ? customCity : city);
-            console.log("price:", price);
-            console.log("size:", size);
-            console.log("userId:", userId);
-            console.log("images:", images);
-
-
             // Call backend API
             const response = await fetch("http://localhost:5000/api/v1/lands", {
                 method: "POST",
@@ -105,6 +95,9 @@ const CreateLand: React.FC = () => {
 
             // const data = await response.json();
             setSuccess("Land created successfully!");
+            setTimeout(() => {
+                navigate("/mylistings");
+            }, 2000);
             // Clear form fields and images
             setDistrict("");
             setCity("");
