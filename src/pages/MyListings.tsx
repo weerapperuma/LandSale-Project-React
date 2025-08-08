@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import LandCard from '../components/LandCard'
+import {toast} from "react-toastify";
 
 type LandFromAPI = {
     _id: string
@@ -22,7 +23,12 @@ const MyListings: React.FC = () => {
     useEffect(() => {
         const fetchLands = async () => {
             try {
-                const res = await fetch('http://localhost:5000/api/v1/lands')
+                const userId=localStorage.getItem('userId')
+                const res = await fetch(`http://localhost:5000/api/v1/lands/user/${userId}`)
+
+                if (!userId) {
+                    throw new Error('User not logged in')
+                }
                 if (!res.ok) {
                     throw new Error('Failed to fetch lands')
                 }
@@ -64,21 +70,40 @@ const MyListings: React.FC = () => {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                     {lands.map((land) => (
-                        <LandCard
-                            key={land._id}
-                            land={{
-                                landId: land._id,
-                                title: land.title,
-                                description: land.description,
-                                price: land.price,
-                                location: `${land.city}, ${land.district}`,
-                                image: land.images[0] || 'https://via.placeholder.com/400x300?text=No+Image',
-                                listedDate: land.createdAt || '',
-                                ownerId: land.userId,
-                            }}
-                        />
+                        <div key={land._id} className="relative group">
+                            {/* Card */}
+                            <LandCard
+                                land={{
+                                    landId: land._id,
+                                    title: land.title,
+                                    description: land.description,
+                                    price: land.price,
+                                    location: `${land.city}, ${land.district}`,
+                                    image: land.images[0] || 'https://placehold.co/400x300?text=No+Image',
+                                    listedDate: land.createdAt || '',
+                                    ownerId: land.userId,
+                                }}
+                            />
+
+                            {/* Hover Buttons */}
+                            <div className="absolute top-4 right-4 flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <button
+                                    onClick={() => toast.info(`Update clicked for "${land.title}"`)}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-1 px-3 rounded shadow"
+                                >
+                                    Update
+                                </button>
+                                <button
+                                    onClick={() => toast.error(`Delete clicked for "${land.title}"`)}
+                                    className="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold py-1 px-3 rounded shadow"
+                                >
+                                    Delete
+                                </button>
+                            </div>
+                        </div>
                     ))}
                 </div>
+
             </div>
         </div>
     )
