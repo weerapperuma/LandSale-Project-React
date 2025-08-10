@@ -4,6 +4,7 @@ import LoginPage from '../features/auth/LoginPage';
 import RegisterPage from '../features/auth/RegisterPage';
 import CreateLand from "../pages/CreateLand.tsx";
 import MyListings from "../pages/MyListings.tsx";
+import AdminDashboard from "../pages/AdminDashboard";
 
 const AppRoutes = () => {
     return (
@@ -13,6 +14,7 @@ const AppRoutes = () => {
             <Route path="/register" element={<RegisterPage/>} />
             <Route path="/createland" element={<CreateLand/>} />
             <Route path="/mylistings" element={<MyListings/>}/>
+            <Route path="/admin/dashboard" element={<AdminDashboard/>}/>
             {/* <Route path="*" element={<NotFound/>} /> */}
         </Routes>
     )
