@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { logout } from "../features/auth/authSlice.ts";
 import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../app/store.ts";
@@ -7,29 +7,30 @@ type User = {
     id: string;
     name: string;
     email: string;
+    address: string;
     role: "ADMIN" | "USER";
+    phone: string;
+    createdAt?: string;
 };
 
 type Land = {
     id: string;
     title: string;
-    owner: string;
-    status: "Pending" | "Approved" | "Rejected";
+    description: string;
+    district: string;
+    city: string;
+    price: number;
+    size: number;
+    images: string[];
+    isApproved: boolean;
+    createdAt?: string;
+    userId: string;
 };
-
-const dummyUsers: User[] = [
-    { id: "1", name: "Alice", email: "alice@mail.com", role: "USER" },
-    { id: "2", name: "Bob", email: "bob@mail.com", role: "ADMIN" },
-];
-
-const dummyLands: Land[] = [
-    { id: "101", title: "Beautiful Land", owner: "Alice", status: "Pending" },
-    { id: "102", title: "Farm Land", owner: "Bob", status: "Approved" },
-];
-
 const AdminDashboard: React.FC = () => {
     const dispatch = useDispatch<AppDispatch>();
     const navigate = useNavigate();
+    const id = localStorage.getItem("userId");
+    const email = localStorage.getItem("userEmail");
     const [activeTab, setActiveTab] = useState<
         "profile" | "users" | "lands" | "approvals"
     >("profile");
@@ -55,6 +56,76 @@ const AdminDashboard: React.FC = () => {
     const handleApproveLand = (id: string) => alert(`Approve land ${id}`);
     const handleRejectLand = (id: string) => alert(`Reject land ${id}`);
     const handleUpdateProfile = () => alert("Update profile");
+
+    const [users, setUsers] = useState<User[]>([]);
+    const [lands, setLands] = useState<Land[]>([]);
+    const [loadingUsers, setLoadingUsers] = useState(false);
+    const [loadingLands, setLoadingLands] = useState(false);
+    const [errorUsers, setErrorUsers] = useState<string | null>(null);
+    const [errorLands, setErrorLands] = useState<string | null>(null);
+
+    // Fetch users when activeTab === "users":
+    useEffect(() => {
+        const fetchUsers = async () => {
+            setLoadingUsers(true);
+            setErrorUsers(null);
+            try {
+                const token = localStorage.getItem("token");
+                if (!token) throw new Error("No auth token found");
+
+                const res = await fetch("http://localhost:5000/api/v1/user", {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                });
+
+                if (!res.ok) throw new Error("Failed to fetch users");
+
+                const data = await res.json();
+                setUsers(data.data); // Adjust if API shape is different
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setErrorUsers(err.message);
+                } else {
+                    setErrorUsers("Failed to fetch users");
+                }
+            } finally {
+                setLoadingUsers(false);
+            }
+        };
+
+        if (activeTab === "users") {
+            fetchUsers();
+        }
+    }, [activeTab]);
+
+    //Fetch lands when activeTab === "lands"
+    useEffect(() => {
+        const fetchLands = async () => {
+            setLoadingLands(true);
+            setErrorLands(null);
+            try {
+                const res = await fetch("http://localhost:5000/api/v1/lands");
+                if (!res.ok) throw new Error("Failed to fetch lands");
+
+                const data = await res.json();
+                setLands(data.data); // Adjust if needed
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    setErrorLands(err.message);
+                } else {
+                    setErrorLands("Failed to fetch lands");
+                }
+            } finally {
+                setLoadingLands(false);
+            }
+        };
+
+        if (activeTab === "lands" || activeTab === "approvals") {
+            fetchLands();
+        }
+    }, [activeTab]);
+
 
     return (
         <div className="min-h-screen bg-gray-50">
@@ -102,8 +173,8 @@ const AdminDashboard: React.FC = () => {
                 {activeTab === "profile" && (
                     <section className="bg-white p-6 rounded shadow-md">
                         <h2 className="text-2xl font-semibold mb-4">Admin Profile</h2>
-                        <p>Name: Admin User</p>
-                        <p>Email: admin@example.com</p>
+                        <p>ADMIN ID: {id}</p>
+                        <p>Email : {email}</p>
                         {/* Replace with editable fields/form */}
                         <button
                             onClick={handleUpdateProfile}
@@ -125,80 +196,141 @@ const AdminDashboard: React.FC = () => {
                                 Add User
                             </button>
                         </div>
-                        <table className="w-full table-auto border-collapse border border-gray-300">
-                            <thead className="bg-red-100 text-red-700">
-                            <tr>
-                                <th className="border border-gray-300 px-4 py-2">Name</th>
-                                <th className="border border-gray-300 px-4 py-2">Email</th>
-                                <th className="border border-gray-300 px-4 py-2">Role</th>
-                                <th className="border border-gray-300 px-4 py-2">Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {dummyUsers.map((user) => (
-                                <tr
-                                    key={user.id}
-                                    className="hover:bg-red-50 transition-colors"
-                                >
-                                    <td className="border border-gray-300 px-4 py-2">{user.name}</td>
-                                    <td className="border border-gray-300 px-4 py-2">{user.email}</td>
-                                    <td className="border border-gray-300 px-4 py-2">{user.role}</td>
-                                    <td className="border border-gray-300 px-4 py-2 space-x-2">
-                                        <button
-                                            onClick={() => handleUpdateUser(user.id)}
-                                            className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded hover:bg-yellow-500 transition"
-                                        >
-                                            Update
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteUser(user.id)}
-                                            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
+
+                        {loadingUsers && <p>Loading users...</p>}
+                        {errorUsers && <p className="text-red-600">{errorUsers}</p>}
+
+                        {!loadingUsers && !errorUsers && users.length === 0 && (
+                            <p>No users found.</p>
+                        )}
+
+                        {!loadingUsers && !errorUsers && users.length > 0 && (
+                            <table className="w-full table-auto border-collapse border border-gray-300">
+                                <thead className="bg-red-100 text-red-700">
+                                <tr>
+                                    <th className="border border-gray-300 px-4 py-2">Name</th>
+                                    <th className="border border-gray-300 px-4 py-2">Email</th>
+                                    <th className="border border-gray-300 px-4 py-2">Address</th>
+                                    <th className="border border-gray-300 px-4 py-2">Phone</th>
+                                    <th className="border border-gray-300 px-4 py-2">Role</th>
+                                    <th className="border border-gray-300 px-4 py-2">Created At</th>
+                                    <th className="border border-gray-300 px-4 py-2">Actions</th>
                                 </tr>
-                            ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                {users.map((user) => (
+                                    <tr
+                                        key={user.id || user.id} // use whichever ID you get
+                                        className="hover:bg-red-50 transition-colors"
+                                    >
+                                        <td className="border border-gray-300 px-4 py-2">{user.name}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{user.email}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{user.address}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{user.phone}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{user.role}</td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {user.createdAt
+                                                ? new Date(user.createdAt).toLocaleDateString()
+                                                : "-"}
+                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2 flex gap-2">
+                                            <button
+                                                onClick={() => handleUpdateUser(user.id)}
+                                                className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded hover:bg-yellow-500 transition inline-block"
+                                                style={{ whiteSpace: 'nowrap' }}
+                                            >
+                                                Update
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteUser(user.id)}
+                                                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition inline-block"
+                                                style={{ whiteSpace: 'nowrap' }}
+                                            >
+                                                Delete
+                                            </button>
+                                        </td>
+
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        )}
                     </section>
                 )}
+
 
                 {activeTab === "lands" && (
                     <section className="bg-white p-6 rounded shadow-md overflow-x-auto">
                         <h2 className="text-2xl font-semibold mb-4">Land Management</h2>
-                        <table className="w-full table-auto border-collapse border border-gray-300">
-                            <thead className="bg-red-100 text-red-700">
-                            <tr>
-                                <th className="border border-gray-300 px-4 py-2">Title</th>
-                                <th className="border border-gray-300 px-4 py-2">Owner</th>
-                                <th className="border border-gray-300 px-4 py-2">Status</th>
-                                <th className="border border-gray-300 px-4 py-2">Actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {dummyLands.map((land) => (
-                                <tr
-                                    key={land.id}
-                                    className="hover:bg-red-50 transition-colors"
-                                >
-                                    <td className="border border-gray-300 px-4 py-2">{land.title}</td>
-                                    <td className="border border-gray-300 px-4 py-2">{land.owner}</td>
-                                    <td className="border border-gray-300 px-4 py-2">{land.status}</td>
-                                    <td className="border border-gray-300 px-4 py-2 space-x-2">
-                                        <button
-                                            onClick={() => handleDeleteLand(land.id)}
-                                            className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
-                                        >
-                                            Delete
-                                        </button>
-                                    </td>
+
+                        {loadingLands && <p>Loading lands...</p>}
+                        {errorLands && <p className="text-red-600">{errorLands}</p>}
+
+                        {!loadingLands && !errorLands && lands.length === 0 && (
+                            <p>No lands found.</p>
+                        )}
+
+                        {!loadingLands && !errorLands && lands.length > 0 && (
+                            <table className="w-full table-auto border-collapse border border-gray-300">
+                                <thead className="bg-red-100 text-red-700">
+                                <tr>
+                                    <th className="border border-gray-300 px-4 py-2">Title</th>
+                                    <th className="border border-gray-300 px-4 py-2">Description</th>
+                                    <th className="border border-gray-300 px-4 py-2">District</th>
+                                    <th className="border border-gray-300 px-4 py-2">City</th>
+                                    <th className="border border-gray-300 px-4 py-2">Price (LKR)</th>
+                                    <th className="border border-gray-300 px-4 py-2">Size (acres)</th>
+                                    <th className="border border-gray-300 px-4 py-2">Images</th>
+                                    <th className="border border-gray-300 px-4 py-2">Approved</th>
+                                    <th className="border border-gray-300 px-4 py-2">Created At</th>
+                                    <th className="border border-gray-300 px-4 py-2">Actions</th>
                                 </tr>
-                            ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody>
+                                {lands.map((land) => (
+                                    <tr
+                                        key={land.id || land.id}
+                                        className="hover:bg-red-50 transition-colors"
+                                    >
+                                        <td className="border border-gray-300 px-4 py-2">{land.title}</td>
+                                        <td className="border border-gray-300 px-4 py-2 truncate max-w-xs" title={land.description}>
+                                            {land.description.length > 50 ? land.description.slice(0, 50) + "..." : land.description}
+                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2">{land.district}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{land.city}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{land.price.toLocaleString()}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{land.size}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{land.images.length}</td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {land.isApproved ? (
+                                                <span className="text-green-600 font-semibold">Yes</span>
+                                            ) : (
+                                                <span className="text-red-600 font-semibold">No</span>
+                                            )}
+                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2">
+                                            {land.createdAt
+                                                ? new Date(land.createdAt).toLocaleDateString()
+                                                : "-"}
+                                        </td>
+                                        <td className="border border-gray-300 px-4 py-2 space-x-2">
+                                            <button
+                                                onClick={() => handleDeleteLand(land.id || land.id)}
+                                                className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                                            >
+                                                Delete
+                                            </button>
+                                            {/* You can add update or approve buttons here as needed */}
+                                        </td>
+                                    </tr>
+                                ))}
+                                </tbody>
+                            </table>
+                        )}
                     </section>
                 )}
+
+
 
                 {activeTab === "approvals" && (
                     <section className="bg-white p-6 rounded shadow-md overflow-x-auto">
@@ -213,16 +345,16 @@ const AdminDashboard: React.FC = () => {
                             </tr>
                             </thead>
                             <tbody>
-                            {dummyLands
-                                .filter((land) => land.status === "Pending")
+                            {lands
+                                .filter((land) => land.isApproved === true)
                                 .map((land) => (
                                     <tr
                                         key={land.id}
                                         className="hover:bg-red-50 transition-colors"
                                     >
                                         <td className="border border-gray-300 px-4 py-2">{land.title}</td>
-                                        <td className="border border-gray-300 px-4 py-2">{land.owner}</td>
-                                        <td className="border border-gray-300 px-4 py-2">{land.status}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{land.id}</td>
+                                        <td className="border border-gray-300 px-4 py-2">{land.size}</td>
                                         <td className="border border-gray-300 px-4 py-2 space-x-2">
                                             <button
                                                 onClick={() => handleApproveLand(land.id)}

@@ -47,6 +47,7 @@ const LoginPage = () => {
     if (validateForm()) {
       try {
         await dispatch(loginUser({ email, password })).unwrap()
+        localStorage.setItem('userEmail', email)
         toast.success("Signed in successfully!")
         navigate('/')
       } catch (err) {

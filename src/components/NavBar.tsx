@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import {Link, useNavigate} from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import {
   Menu, X, User, LogOut, Settings,
@@ -13,6 +13,7 @@ const NavBar = () => {
   const [isOpen, setIsOpen] = useState(false)
   const [showUserMenu, setShowUserMenu] = useState(false)
   const [showWishlistPreview, setShowWishlistPreview] = useState(false)
+  const [showListPreview, setShowListPreview] = useState(false)
 
   const dispatch = useDispatch<AppDispatch>()
   const { token } = useSelector((state: RootState) => state.auth)
@@ -22,12 +23,21 @@ const NavBar = () => {
   // Refs for click-outside behavior
   const userMenuRef = useRef<HTMLDivElement | null>(null)
   const wishlistRef = useRef<HTMLDivElement | null>(null)
-
+  const listRef = useRef<HTMLDivElement | null>(null)
   const handleLogout = () => {
     dispatch(logout())
     setShowUserMenu(false)
   }
-
+  const navigate = useNavigate()
+  const handleListClick = () => {
+    if (isAuthenticated) {
+      // Navigate immediately
+      navigate('/mylistings')
+    } else {
+      // Show popup
+      setShowListPreview(true)
+    }
+  }
   // Close wishlist preview on outside click
   useEffect(() => {
     const handleClickOutsideWishlist = (event: MouseEvent) => {
@@ -54,6 +64,20 @@ const NavBar = () => {
     return () => document.removeEventListener('mousedown', handleClickOutsideUserMenu)
   }, [showUserMenu])
 
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (listRef.current && !listRef.current.contains(event.target as Node)) {
+        setShowListPreview(false)
+      }
+    }
+    if (showListPreview) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [showListPreview])
+
   return (
       <nav className="bg-gradient-to-r from-sky-600 via-blue-500 to-cyan-400 text-white shadow-xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
@@ -72,9 +96,28 @@ const NavBar = () => {
               <Link to="/" title="Home" className="hover:text-yellow-200">
                 <Home size={22} />
               </Link>
-              <Link to="/mylistings" title="Listings" className="hover:text-yellow-200">
-                <Map size={22} />
-              </Link>
+
+              {/* Listings */}
+              <div className="relative" ref={listRef}>
+                <button
+                    onClick={handleListClick}
+                    className="hover:text-yellow-200"
+                    title="Listings"
+                >
+                  <Map size={22} />
+                </button>
+
+                {showListPreview && !isAuthenticated && (
+                    <div className="absolute right-0 mt-2 w-72 bg-white text-gray-800 rounded-xl shadow-2xl border py-4 px-5 z-50">
+                      <AuthRequiredPopup
+                          show={true}
+                          onClose={() => setShowListPreview(false)}
+                          message="Please sign in to view your listings."
+                      />
+                    </div>
+                )}
+              </div>
+
               {/* Wishlist */}
               <div className="relative" ref={wishlistRef}>
                 <button
