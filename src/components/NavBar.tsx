@@ -31,13 +31,31 @@ const NavBar = () => {
   const navigate = useNavigate()
   const handleListClick = () => {
     if (isAuthenticated) {
-      // Navigate immediately
-      navigate('/mylistings')
+      navigate('/mylistings');
     } else {
-      // Show popup
-      setShowListPreview(true)
+      setShowListPreview(true);
+      setShowWishlistPreview(false); // Close wishlist popup
     }
-  }
+  };
+  const handleMobileWishlistClick = () => {
+    setShowWishlistPreview(prev => {
+      const newState = !prev;
+      if (newState) {
+        setShowListPreview(false);
+      }
+      return newState;
+    });
+  };
+
+  const handleWishlistClick = () => {
+    if (isAuthenticated) {
+      navigate('/wishlist');
+    } else {
+      setShowListPreview(true);
+      setShowWishlistPreview(false); // Close wishlist popup
+    }
+  };
+
   // Close wishlist preview on outside click
   useEffect(() => {
     const handleClickOutsideWishlist = (event: MouseEvent) => {
@@ -121,44 +139,20 @@ const NavBar = () => {
               {/* Wishlist */}
               <div className="relative" ref={wishlistRef}>
                 <button
-                    onClick={() => setShowWishlistPreview(prev => !prev)}
+                    onClick={handleWishlistClick}
                     className="hover:text-yellow-200"
                     title="Wishlist"
                 >
                   <Heart size={22} />
                 </button>
-                {showWishlistPreview && (
+
+                {showWishlistPreview && !isAuthenticated && (
                     <div className="absolute right-0 mt-2 w-72 bg-white text-gray-800 rounded-xl shadow-2xl border py-4 px-5 z-50">
-                      {isAuthenticated ? (
-                          <>
-                            <h4 className="text-md font-semibold mb-2">Your Wishlist</h4>
-                            <div className="space-y-2 text-sm">
-                              <div className="flex justify-between">
-                                <span>🌾 Land in Ella</span>
-                                <span className="text-xs text-gray-500">Rs. 3.5M</span>
-                              </div>
-                              <div className="flex justify-between">
-                                <span>🏨 Colombo Plot</span>
-                                <span className="text-xs text-gray-500">Rs. 7.8M</span>
-                              </div>
-                            </div>
-                            <div className="mt-4 text-center border-t pt-2">
-                              <Link
-                                  to="/wishlist"
-                                  className="text-sm text-blue-600 hover:underline"
-                                  onClick={() => setShowWishlistPreview(false)}
-                              >
-                                View full wishlist →
-                              </Link>
-                            </div>
-                          </>
-                      ) : (
-                          <AuthRequiredPopup
-                              show={true}
-                              onClose={() => setShowWishlistPreview(false)}
-                              message="Please sign in to view your wishlist."
-                          />
-                      )}
+                      <AuthRequiredPopup
+                          show={true}
+                          onClose={() => setShowWishlistPreview(false)}
+                          message="Please sign in to view your listings."
+                      />
                     </div>
                 )}
               </div>
@@ -235,11 +229,12 @@ const NavBar = () => {
                 <Map size={20} /> My Listings
               </Link>
               <button
-                  onClick={() => setShowWishlistPreview(prev => !prev)}
+                  onClick={handleMobileWishlistClick}
                   className="flex items-center gap-2 py-2 text-white hover:text-yellow-200"
               >
                 <Heart size={20} /> Wishlist
               </button>
+
 
               {isAuthenticated && role === 'ADMIN' && (
                   <Link

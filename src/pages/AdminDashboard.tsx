@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import type { AppDispatch } from "../app/store.ts";
 import { useNavigate } from "react-router-dom";
 type User = {
-    id: string;
+    _id: string;
     name: string;
     email: string;
     address: string;
@@ -49,7 +49,6 @@ const AdminDashboard: React.FC = () => {
     };
 
     // Placeholder handlers for user actions
-    const handleDeleteUser = (id: string) => alert(`Delete user ${id}`);
     const handleUpdateUser = (id: string) => alert(`Update user ${id}`);
     const handleAddUser = () => alert("Add new user");
     const handleDeleteLand = (id: string) => alert(`Delete land ${id}`);
@@ -63,6 +62,32 @@ const AdminDashboard: React.FC = () => {
     const [loadingLands, setLoadingLands] = useState(false);
     const [errorUsers, setErrorUsers] = useState<string | null>(null);
     const [errorLands, setErrorLands] = useState<string | null>(null);
+
+    const handleDeleteUser = async (id: string) => {
+        try {
+            const token = localStorage.getItem("token");
+            console.log(token);
+            console.log("admid: ",id);
+            const res = await fetch(`http://localhost:5000/api/v1/user/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                console.log("✅ Deleted:", data);
+            } else {
+                console.error("❌ Delete failed:", data);
+            }
+        } catch (err) {
+            console.error("Error deleting user:", err);
+        }
+    };
+
+
+
 
     // Fetch users when activeTab === "users":
     useEffect(() => {
@@ -220,7 +245,7 @@ const AdminDashboard: React.FC = () => {
                                 <tbody>
                                 {users.map((user) => (
                                     <tr
-                                        key={user.id || user.id} // use whichever ID you get
+                                        key={user._id || user._id} // use whichever ID you get
                                         className="hover:bg-red-50 transition-colors"
                                     >
                                         <td className="border border-gray-300 px-4 py-2">{user.name}</td>
@@ -235,14 +260,14 @@ const AdminDashboard: React.FC = () => {
                                         </td>
                                         <td className="border border-gray-300 px-4 py-2 flex gap-2">
                                             <button
-                                                onClick={() => handleUpdateUser(user.id)}
+                                                onClick={() => handleUpdateUser(user._id)}
                                                 className="bg-yellow-400 text-yellow-900 px-3 py-1 rounded hover:bg-yellow-500 transition inline-block"
                                                 style={{ whiteSpace: 'nowrap' }}
                                             >
                                                 Update
                                             </button>
                                             <button
-                                                onClick={() => handleDeleteUser(user.id)}
+                                                onClick={() => handleDeleteUser(user._id)}
                                                 className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition inline-block"
                                                 style={{ whiteSpace: 'nowrap' }}
                                             >
