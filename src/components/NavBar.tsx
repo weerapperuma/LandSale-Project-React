@@ -1,7 +1,7 @@
 import {Link, useNavigate} from 'react-router-dom'
 import { useState, useEffect, useRef } from 'react'
 import {
-  Menu, X, User, LogOut, Settings,
+  Menu, X, User, LogOut,
   Home, Heart, Map, UserCircle, UserCog
 } from 'lucide-react'
 import { useSelector, useDispatch } from 'react-redux'
@@ -184,9 +184,6 @@ const NavBar = () => {
                           <Link to="/profile" className="flex items-center px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
                             <User size={16} className="mr-3" /> Profile
                           </Link>
-                          <Link to="/settings" className="flex items-center px-4 py-2 hover:bg-gray-100 text-sm text-gray-700">
-                            <Settings size={16} className="mr-3" /> Settings
-                          </Link>
                           <button
                               onClick={handleLogout}
                               className="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50 text-sm"
@@ -246,21 +243,15 @@ const NavBar = () => {
               )}
 
               {isAuthenticated && role !== 'ADMIN' && (
-                  <>
-                    <Link to="/profile" className="flex items-center gap-2 py-2 text-white hover:text-yellow-200">
-                      <User size={20} /> Profile
-                    </Link>
-                    <Link to="/settings" className="flex items-center gap-2 py-2 text-white hover:text-yellow-200">
-                      <Settings size={20} /> Settings
-                    </Link>
-                    <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 py-2 text-red-300 hover:text-red-100"
-                    >
-                      <LogOut size={20} /> Sign Out
-                    </button>
-                  </>
+                  <Link
+                      to="/profile"  // or any page you want to navigate to
+                      className="flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-full hover:bg-white/30"
+                  >
+                    <User size={18} />
+                    <span>Profile</span>
+                  </Link>
               )}
+
 
               {!isAuthenticated && (
                   <Link
